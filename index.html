@@ -165,6 +165,36 @@
         transform 0.25s ease;
 }
 
+    .settings.collapsed {
+        width: 54px;
+        height: 54px;
+        padding: 10px;
+        overflow: hidden;
+    }
+
+    .settings.collapsed .setting,
+    .settings.collapsed .setting-title {
+        display: none;
+    }
+
+    .settings-toggle {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 28px;
+        height: 28px;
+        display: grid;
+        place-items: center;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: rgba(255,255,255,0.08);
+        color: var(--text);
+        cursor: pointer;
+        font-size: 12px;
+        line-height: 1;
+        padding: 0;
+    }
+
     .setting-title {
         font-size: 12px;
         text-transform: uppercase;
@@ -279,7 +309,9 @@
 
 <div class="settings-trigger"></div>
 
-<div class="settings">
+<div class="settings" id="settingsPanel">
+
+    <button class="settings-toggle" id="settingsToggle" type="button" aria-label="Minimise controls">▾</button>
 
     <div class="setting">
         <div class="setting-title">
@@ -340,8 +372,24 @@
     const formatToggle =
         document.getElementById("formatToggle");
 
+    const settingsPanel =
+        document.getElementById("settingsPanel");
 
-  
+    const settingsToggle =
+        document.getElementById("settingsToggle");
+
+    function toggleSettings() {
+        settingsPanel.classList.toggle("collapsed");
+
+        const collapsed = settingsPanel.classList.contains("collapsed");
+        settingsToggle.textContent = collapsed ? "▸" : "▾";
+        settingsToggle.setAttribute(
+            "aria-label",
+            collapsed ? "Expand controls" : "Minimise controls"
+        );
+    }
+
+    settingsToggle.addEventListener("click", toggleSettings);
 
     function updateClock() {
 
