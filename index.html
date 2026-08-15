@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <link href="https://fonts.googleapis.com/css2?family=Share+Tech&display=swap" rel="stylesheet">
 
 <title>GlassClock</title>
 
@@ -132,44 +133,37 @@
         cursor: pointer;
     }
 
-    /* Settings panel */
-    .settings {
-        position: fixed;
 
-        right: 25px;
-        bottom: 25px;
+.settings {
+    position: fixed;
 
-        width: 250px;
+    right: 25px;
+    bottom: 25px;
 
-        padding: 20px;
+    width: 250px;
 
-        border-radius: 24px;
+    padding: 20px;
 
-        background: var(--glass);
+    border-radius: 24px;
 
-        border: 1px solid var(--border);
+    background: var(--glass);
 
-        backdrop-filter: blur(30px);
-        -webkit-backdrop-filter: blur(30px);
+    border: 1px solid var(--border);
 
-        box-shadow: 0 20px 60px var(--shadow);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
 
-        opacity: 0;
-        transform: translateY(15px) scale(0.96);
+    box-shadow: 0 20px 60px var(--shadow);
 
-        pointer-events: none;
+    opacity: 1;
+    transform: translateY(0) scale(1);
 
-        transition:
-            opacity 0.25s ease,
-            transform 0.25s ease;
-    }
+    pointer-events: auto;
 
-    .settings-trigger:hover + .settings,
-    .settings:hover {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-        pointer-events: auto;
-    }
+    transition:
+        opacity 0.25s ease,
+        transform 0.25s ease;
+}
 
     .setting-title {
         font-size: 12px;
