@@ -1,1 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<title>GlassClock</title>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    :root {
+        --bg: #111111;
+        --text: #ffffff;
+        --glass: rgba(255, 255, 255, 0.10);
+        --border: rgba(255, 255, 255, 0.18);
+        --shadow: rgba(0, 0, 0, 0.35);
+    }
+
+    body.light {
+        --text: #111111;
+        --glass: rgba(255, 255, 255, 0.28);
+        --border: rgba(255, 255, 255, 0.45);
+        --shadow: rgba(0, 0, 0, 0.12);
+    }
+
+    body {
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        background: var(--bg);
+        color: var(--text);
+
+        font-family:
+            -apple-system,
+            BlinkMacSystemFont,
+            "SF Pro Display",
+            "Segoe UI",
+            sans-serif;
+
+        transition:
+            background 0.5s ease,
+            color 0.5s ease;
+
+        user-select: none;
+    }
+
+    /* Ambient glass background */
+    .ambient {
+        position: fixed;
+        width: 45vw;
+        height: 45vw;
+
+        border-radius: 50%;
+
+        background: rgba(255,255,255,0.08);
+
+        filter: blur(100px);
+
+        pointer-events: none;
+    }
+
+    .clock-container {
+        position: relative;
+
+        padding: clamp(35px, 6vw, 90px)
+                 clamp(45px, 8vw, 130px);
+
+        border: 1px solid var(--border);
+
+        border-radius: 42px;
+
+        background: var(--glass);
+
+        backdrop-filter: blur(35px) saturate(150%);
+        -webkit-backdrop-filter: blur(35px) saturate(150%);
+
+        box-shadow:
+            0 30px 100px var(--shadow),
+            inset 0 1px 1px rgba(255,255,255,0.18);
+
+        text-align: center;
+    }
+
+    .clock {
+        font-size: clamp(4rem, 12vw, 13rem);
+
+        font-weight: 500;
+
+        letter-spacing: -0.075em;
+
+        line-height: 0.9;
+
+        font-variant-numeric: tabular-nums;
+
+        white-space: nowrap;
+    }
+
+    .date {
+        margin-top: 30px;
+
+        font-size: clamp(0.8rem, 1.5vw, 1.2rem);
+
+        font-weight: 500;
+
+        opacity: 0.55;
+
+        letter-spacing: 0.08em;
+
+        text-transform: uppercase;
+    }
+
+    /* Settings trigger */
+    .settings-trigger {
+        position: fixed;
+
+        right: 0;
+        bottom: 0;
+
+        width: 80px;
+        height: 80px;
+
+        cursor: pointer;
+    }
+
+    /* Settings panel */
+    .settings {
+        position: fixed;
+
+        right: 25px;
+        bottom: 25px;
+
+        width: 250px;
+
+        padding: 20px;
+
+        border-radius: 24px;
+
+        background: var(--glass);
+
+        border: 1px solid var(--border);
+
+        backdrop-filter: blur(30px);
+        -webkit-backdrop-filter: blur(30px);
+
+        box-shadow: 0 20px 60px var(--shadow);
+
+        opacity: 0;
+        transform: translateY(15px) scale(0.96);
+
+        pointer-events: none;
+
+        transition:
+            opacity 0.25s ease,
+            transform 0.25s ease;
+    }
+
+    .settings-trigger:hover + .settings,
+    .settings:hover {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        pointer-events: auto;
+    }
+
+    .setting-title {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        opacity: 0.5;
+        margin-bottom: 10px;
+    }
+
+    .setting {
+        margin-bottom: 20px;
+    }
+
+    .setting:last-child {
+        margin-bottom: 0;
+    }
+
+    .mode-buttons {
+        display: flex;
+        gap: 8px;
+    }
+
+    button {
+        flex: 1;
+
+        border: 1px solid var(--border);
+
+        background: rgba(255,255,255,0.08);
+
+        color: var(--text);
+
+        padding: 10px;
+
+        border-radius: 12px;
+
+        cursor: pointer;
+
+        font-size: 13px;
+
+        transition: 0.2s ease;
+    }
+
+    button:hover {
+        background: rgba(255,255,255,0.18);
+    }
+
+    input[type="color"] {
+        width: 100%;
+        height: 42px;
+
+        border: none;
+        border-radius: 12px;
+
+        cursor: pointer;
+
+        background: transparent;
+    }
+
+    .format {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        font-size: 13px;
+    }
+
+    .format input {
+        accent-color: var(--text);
+    }
+
+    @media (max-width: 600px) {
+
+        .clock-container {
+            width: 92vw;
+
+            padding: 45px 20px;
+
+            border-radius: 30px;
+        }
+
+        .clock {
+            font-size: 16vw;
+        }
+
+        .date {
+            margin-top: 20px;
+            font-size: 11px;
+        }
+
+        .settings {
+            right: 15px;
+            bottom: 15px;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<div class="ambient"></div>
+
+<main class="clock-container">
+
+    <div class="clock" id="clock">
+        00:00:00
+    </div>
+
+    <div class="date" id="date">
+        Loading...
+    </div>
+
+</main>
+
+<div class="settings-trigger"></div>
+
+<div class="settings">
+
+    <div class="setting">
+        <div class="setting-title">
+            Appearance
+        </div>
+
+        <div class="mode-buttons">
+            <button onclick="setMode('dark')">
+                Dark
+            </button>
+
+            <button onclick="setMode('light')">
+                Light
+            </button>
+        </div>
+    </div>
+
+    <div class="setting">
+        <div class="setting-title">
+            Background
+        </div>
+
+        <input
+            type="color"
+            id="colorPicker"
+            value="#111111"
+        >
+    </div>
+
+    <div class="setting">
+
+        <div class="format">
+
+            <span>
+                24-hour time
+            </span>
+
+            <input
+                type="checkbox"
+                id="formatToggle"
+                checked
+            >
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+    const clock = document.getElementById("clock");
+    const date = document.getElementById("date");
+
+    const colorPicker =
+        document.getElementById("colorPicker");
+
+    const formatToggle =
+        document.getElementById("formatToggle");
+
+
+  
+
+    function updateClock() {
+
+        const now = new Date();
+
+        let hours = now.getHours();
+        const minutes = now.getMinutes();
+        const seconds = now.getSeconds();
+
+        let suffix = "";
+
+        if (!formatToggle.checked) {
+
+            suffix = hours >= 12 ? " PM" : " AM";
+
+            hours = hours % 12;
+
+            if (hours === 0)
+                hours = 12;
+        }
+
+        const h =
+            String(hours).padStart(2, "0");
+
+        const m =
+            String(minutes).padStart(2, "0");
+
+        const s =
+            String(seconds).padStart(2, "0");
+
+        clock.textContent =
+            `${h}:${m}:${s}${suffix}`;
+
+
+   
+        date.textContent =
+            now.toLocaleDateString(
+                undefined,
+                {
+                    weekday: "long",
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric"
+                }
+            );
+    }
+
+
+    updateClock();
+
+    setInterval(updateClock, 1000);
+
+
+
+    function setMode(mode) {
+
+        if (mode === "light") {
+
+            document.body.classList.add("light");
+
+        } else {
+
+            document.body.classList.remove("light");
+
+        }
+    }
+
+
+
+    colorPicker.addEventListener(
+        "input",
+        function () {
+
+            document.documentElement
+                .style
+                .setProperty(
+                    "--bg",
+                    this.value
+                );
+
+        }
+    );
+
+
+
+
+    formatToggle.addEventListener(
+        "change",
+        updateClock
+    );
+
+
+   
+
+    document.addEventListener(
+        "dblclick",
+        () => {
+
+            if (!document.fullscreenElement) {
+
+                document.documentElement
+                    .requestFullscreen()
+                    .catch(() => {});
+
+            } else {
+
+                document.exitFullscreen();
+
+            }
+
+        }
+    );
+
+</script>
+
+</body>
+</html>
